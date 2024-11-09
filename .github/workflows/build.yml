@@ -18,7 +18,7 @@ jobs:
     steps:
     - name: Clone (Linux)
       uses: actions/checkout@v4
-      if: ${{ success() && matrix.os == 'ubuntu-20.04' }}
+      if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
       with:
         repository: facebook/zstd
         ref: refs/tags/${{ github.ref_name }}
@@ -29,22 +29,22 @@ jobs:
         persist-credentials: false
     - name: Clone (Windows)
       uses: actions/checkout@v4
-      if: ${{ success() && matrix.os == 'windows-2022' }}
+      if: ${{ success() && startsWith(matrix.os, 'windows') }}
       with:
         clean: true
         fetch-depth: 1
         show-progress: false
         persist-credentials: false
     - name: Setup Ninja (Windows)
-      if: ${{ success() && matrix.os == 'windows-2022' }}
+      if: ${{ success() && startsWith(matrix.os, 'windows') }}
       uses: seanmiddleditch/gha-setup-ninja@v5
     - name: Setup Visual C++
-      if: ${{ success() && matrix.os == 'windows-2022' }}
+      if: ${{ success() && startsWith(matrix.os, 'windows') }}
       uses: TheMrMilchmann/setup-msvc-dev@v3
       with:
         arch: x64
     - name: Configure vcpkg (Windows)
-      if: ${{ success() && matrix.os == 'windows-2022' }}
+      if: ${{ success() && startsWith(matrix.os, 'windows') }}
       run: |
         echo "VCPKG_TARGET_ARCHITECTURE=x64" >> "$($env:GITHUB_ENV)"
         echo "VCPKG_ROOT=$($env:VCPKG_INSTALLATION_ROOT)" >> "$($env:GITHUB_ENV)"
@@ -53,13 +53,13 @@ jobs:
         echo "VCPKG_LIBRARY_LINKAGE=dynamic" >> "$($env:GITHUB_ENV)"
         echo "VCPKG_CMAKE_SYSTEM_NAME=Windows" >> "$($env:GITHUB_ENV)"
     - name: Make (Linux)
-      if: ${{ success() && matrix.os == 'ubuntu-20.04' }}
+      if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
       run: make lib-mt
       env:
         CFLAGS: '-Xlinker -Bsymbolic'
         LDFLAGS: '-Xlinker -Bsymbolic'
     - name: CMake (Windows)
-      if: ${{ success() && matrix.os == 'windows-2022' }}
+      if: ${{ success() && startsWith(matrix.os, 'windows') }}
       uses: threeal/cmake-action@v2
       with:
         generator: Ninja
@@ -71,19 +71,19 @@ jobs:
           CMAKE_BUILD_TYPE=Release
           CMAKE_MAKE_PROGRAM=ninja
     - name: Upload (Linux)
-      if: ${{ success() && matrix.os == 'ubuntu-20.04' }}
+      if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
       uses: actions/upload-artifact@v4
       with:
         name: 'libs-linux-${{ github.ref_name }}'
         path: 'lib/**/*.so*'
     - name: Upload (Windows)
-      if: ${{ success() && matrix.os == 'windows-2022' }}
+      if: ${{ success() && startsWith(matrix.os, 'windows') }}
       uses: actions/upload-artifact@v4
       with:
         name: 'libs-windows-${{ github.ref_name }}'
         path: '**/*.dll'
     - name: Release (Linux)
-      if: ${{ success() && matrix.os == 'ubuntu-20.04' }}
+      if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
       uses: softprops/action-gh-release@v2
       with:
         files: '**/libzstd.so'
@@ -94,7 +94,7 @@ jobs:
         body: |
           Shared libraries of Zstandard ${{ github.ref_name }}
     - name: Release (Windows)
-      if: ${{ success() && matrix.os == 'windows-2022' }}
+      if: ${{ success() && startsWith(matrix.os, 'windows') }}
       uses: softprops/action-gh-release@v2
       with:
         files: '**/build/zstd.dll'
