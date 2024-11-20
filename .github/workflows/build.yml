@@ -101,7 +101,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: 'libs-macos-${{ github.ref_name }}'
-        path: '**/*.dylib'
+        path: '**/libzstd.dylib'
     - name: Release (Linux)
       if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
       uses: softprops/action-gh-release@v2
@@ -128,7 +128,7 @@ jobs:
       if: ${{ success() && startsWith(matrix.os, 'macos') }}
       uses: softprops/action-gh-release@v2
       with:
-        files: '**/*.dylib'
+        files: '**/libzstd.dylib'
         prerelease: true
         name: 'zstd-${{ github.ref_name }}'
         tag_name: '${{ github.ref_name }}'
