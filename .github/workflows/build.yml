@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ 'ubuntu-20.04', 'windows-2022' ]
+        os: [ 'ubuntu-20.04', 'windows-2022', 'macos-12' ]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
@@ -35,6 +35,17 @@ jobs:
         fetch-depth: 1
         show-progress: false
         persist-credentials: false
+    - name: Clone (MacOS)
+      uses: actions/checkout@v4
+      if: ${{ success() && startsWith(matrix.os, 'macos') }}
+      with:
+        repository: facebook/zstd
+        ref: refs/tags/${{ github.ref_name }}
+        clean: true
+        fetch-depth: 1
+        submodules: recursive
+        show-progress: false
+        persist-credentials: false
     - name: Setup Ninja (Windows)
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
       uses: seanmiddleditch/gha-setup-ninja@v5
@@ -54,6 +65,12 @@ jobs:
         echo "VCPKG_CMAKE_SYSTEM_NAME=Windows" >> "$($env:GITHUB_ENV)"
     - name: Make (Linux)
       if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
+      run: make lib-mt
+      env:
+        CFLAGS: '-Xlinker -Bsymbolic'
+        LDFLAGS: '-Xlinker -Bsymbolic'
+    - name: Make (MacOS)
+      if: ${{ success() && startsWith(matrix.os, 'macos') }}
       run: make lib-mt
       env:
         CFLAGS: '-Xlinker -Bsymbolic'
@@ -82,6 +99,12 @@ jobs:
       with:
         name: 'libs-windows-${{ github.ref_name }}'
         path: '**/*.dll'
+    - name: Upload (MacOS)
+      if: ${{ success() && startsWith(matrix.os, 'macos') }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: 'libs-macos-${{ github.ref_name }}'
+        path: '**/*.dylib'
     - name: Release (Linux)
       if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
       uses: softprops/action-gh-release@v2
@@ -98,6 +121,17 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: '**/build/zstd.dll'
+        prerelease: true
+        name: 'zstd-${{ github.ref_name }}'
+        tag_name: '${{ github.ref_name }}'
+        fail_on_unmatched_files: true
+        body: |
+          Shared libraries of Zstandard ${{ github.ref_name }}
+    - name: Release (MacOS)
+      if: ${{ success() && startsWith(matrix.os, 'macos') }}
+      uses: softprops/action-gh-release@v2
+      with:
+        files: '**/*.dylib'
         prerelease: true
         name: 'zstd-${{ github.ref_name }}'
         tag_name: '${{ github.ref_name }}'
