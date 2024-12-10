@@ -1,21 +1,30 @@
 name: Build
+
 permissions: read-all
+
 on:
   push:
     tags:
     - 'v*.*.*'
 
 jobs:
+
   Build-in-Matrix:
+
     strategy:
       fail-fast: false
       matrix:
-        os: [ 'ubuntu-20.04', 'windows-2022', 'macos-12' ]
+        os: [ 'ubuntu-20.04', 'windows-2022', 'macos-12', 'macos-13-xlarge' ]
+
     runs-on: ${{ matrix.os }}
+
     permissions:
       contents: write
+
     name: Build on ${{ matrix.os }}
+
     steps:
+
     - name: Clone (Linux)
       uses: actions/checkout@v4
       if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
@@ -27,6 +36,7 @@ jobs:
         submodules: recursive
         show-progress: false
         persist-credentials: false
+
     - name: Clone (Windows)
       uses: actions/checkout@v4
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
@@ -35,6 +45,7 @@ jobs:
         fetch-depth: 1
         show-progress: false
         persist-credentials: false
+
     - name: Clone (MacOS)
       uses: actions/checkout@v4
       if: ${{ success() && startsWith(matrix.os, 'macos') }}
@@ -46,14 +57,17 @@ jobs:
         submodules: recursive
         show-progress: false
         persist-credentials: false
+
     - name: Setup Ninja (Windows)
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
       uses: seanmiddleditch/gha-setup-ninja@v5
+
     - name: Setup Visual C++
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
       uses: TheMrMilchmann/setup-msvc-dev@v3
       with:
         arch: x64
+
     - name: Configure vcpkg (Windows)
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
       run: |
@@ -63,15 +77,18 @@ jobs:
         echo "VCPKG_BUILD_TYPE=release" >> "$($env:GITHUB_ENV)"
         echo "VCPKG_LIBRARY_LINKAGE=dynamic" >> "$($env:GITHUB_ENV)"
         echo "VCPKG_CMAKE_SYSTEM_NAME=Windows" >> "$($env:GITHUB_ENV)"
+
     - name: Make (Linux)
       if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
       run: make lib-mt
       env:
         CFLAGS: '-Xlinker -Bsymbolic'
         LDFLAGS: '-Xlinker -Bsymbolic'
+
     - name: Make (MacOS)
       if: ${{ success() && startsWith(matrix.os, 'macos') }}
       run: make lib-mt
+
     - name: CMake (Windows)
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
       uses: threeal/cmake-action@v2
@@ -84,54 +101,83 @@ jobs:
         options: |
           CMAKE_BUILD_TYPE=Release
           CMAKE_MAKE_PROGRAM=ninja
+
     - name: Upload (Linux)
       if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
       uses: actions/upload-artifact@v4
       with:
         name: 'libs-linux-${{ github.ref_name }}'
         path: 'lib/**/*.so*'
+
     - name: Upload (Windows)
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
       uses: actions/upload-artifact@v4
       with:
         name: 'libs-windows-${{ github.ref_name }}'
         path: '**/*.dll'
-    - name: Upload (MacOS)
-      if: ${{ success() && startsWith(matrix.os, 'macos') }}
+
+    - name: Upload (MacOS 12 x64)
+      if: ${{ success() && startsWith(matrix.os, 'macos-12') }}
       uses: actions/upload-artifact@v4
       with:
-        name: 'libs-macos-${{ github.ref_name }}'
+        name: 'libs-macos-x64-${{ github.ref_name }}'
         path: '**/libzstd.dylib'
+
+    - name: Upload (MacOS 13 ARM64)
+      if: ${{ success() && startsWith(matrix.os, 'macos-13') }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: 'libs-macos-arm64-${{ github.ref_name }}'
+        path: '**/libzstd.dylib'
+
     - name: Release (Linux)
       if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
       uses: softprops/action-gh-release@v2
       with:
         files: '**/libzstd.so'
         prerelease: true
-        name: 'zstd-${{ github.ref_name }}'
-        tag_name: '${{ github.ref_name }}'
+        name: zstd-linux-x64-${{ github.ref_name }}
+        tag_name: ${{ github.ref_name }}
         fail_on_unmatched_files: true
+        token: ${{ secrets.RELEASER_TOKEN }}
         body: |
-          Shared libraries of Zstandard ${{ github.ref_name }}
+          Shared libraries of Zstandard ${{ github.ref_name }} for Linux x64
+
     - name: Release (Windows)
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
       uses: softprops/action-gh-release@v2
       with:
         files: '**/build/zstd.dll'
         prerelease: true
-        name: 'zstd-${{ github.ref_name }}'
-        tag_name: '${{ github.ref_name }}'
+        name: zstd-win-x64-${{ github.ref_name }}
+        tag_name: ${{ github.ref_name }}
         fail_on_unmatched_files: true
+        token: ${{ secrets.RELEASER_TOKEN }}
         body: |
-          Shared libraries of Zstandard ${{ github.ref_name }}
-    - name: Release (MacOS)
-      if: ${{ success() && startsWith(matrix.os, 'macos') }}
+          Shared libraries of Zstandard ${{ github.ref_name }} for Windows x64
+
+    - name: Release (MacOS x64)
+      if: ${{ success() && startsWith(matrix.os, 'macos-12') }}
       uses: softprops/action-gh-release@v2
       with:
         files: '**/libzstd.dylib'
         prerelease: true
-        name: 'zstd-${{ github.ref_name }}'
-        tag_name: '${{ github.ref_name }}'
+        name: zstd-osx-x64-${{ github.ref_name }}
+        tag_name: ${{ github.ref_name }}
         fail_on_unmatched_files: true
+        token: ${{ secrets.RELEASER_TOKEN }}
         body: |
-          Shared libraries of Zstandard ${{ github.ref_name }}
+          Shared libraries of Zstandard ${{ github.ref_name }} for MacOS x64
+
+    - name: Release (MacOS ARM64)
+      if: ${{ success() && startsWith(matrix.os, 'macos-13') }}
+      uses: softprops/action-gh-release@v2
+      with:
+        files: '**/libzstd.dylib'
+        prerelease: true
+        name: zstd-osx-arm64-${{ github.ref_name }}
+        tag_name: ${{ github.ref_name }}
+        fail_on_unmatched_files: true
+        token: ${{ secrets.RELEASER_TOKEN }}
+        body: |
+          Shared libraries of Zstandard ${{ github.ref_name }} for MacOS ARM64
