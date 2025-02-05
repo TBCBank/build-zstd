@@ -60,7 +60,7 @@ jobs:
 
     - name: Setup Ninja (Windows)
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
-      uses: seanmiddleditch/gha-setup-ninja@v5
+      uses: seanmiddleditch/gha-setup-ninja@v6
 
     - name: Setup Visual C++
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
