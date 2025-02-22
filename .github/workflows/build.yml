@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ 'ubuntu-20.04', 'windows-2022', 'macos-12', 'macos-13-xlarge' ]
+        os: [ 'ubuntu-20.04', 'windows-2022', 'macos-12', 'macos-14' ]
 
     runs-on: ${{ matrix.os }}
 
@@ -124,7 +124,7 @@ jobs:
         path: '**/libzstd.dylib'
 
     - name: Upload (MacOS 13 ARM64)
-      if: ${{ success() && startsWith(matrix.os, 'macos-13') }}
+      if: ${{ success() && startsWith(matrix.os, 'macos-14') }}
       uses: actions/upload-artifact@v4
       with:
         name: 'libs-macos-arm64-${{ github.ref_name }}'
@@ -170,7 +170,7 @@ jobs:
           Shared libraries of Zstandard ${{ github.ref_name }} for MacOS x64
 
     - name: Release (MacOS ARM64)
-      if: ${{ success() && startsWith(matrix.os, 'macos-13') }}
+      if: ${{ success() && startsWith(matrix.os, 'macos-14') }}
       uses: softprops/action-gh-release@v2
       with:
         files: '**/libzstd.dylib'
