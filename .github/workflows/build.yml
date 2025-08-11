@@ -26,7 +26,7 @@ jobs:
     steps:
 
     - name: Clone (Linux)
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
       with:
         repository: facebook/zstd
@@ -38,7 +38,7 @@ jobs:
         persist-credentials: false
 
     - name: Clone (Windows)
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
       with:
         clean: true
@@ -47,7 +47,7 @@ jobs:
         persist-credentials: false
 
     - name: Clone (MacOS)
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       if: ${{ success() && startsWith(matrix.os, 'macos') }}
       with:
         repository: facebook/zstd
