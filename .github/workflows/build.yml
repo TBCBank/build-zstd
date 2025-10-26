@@ -58,10 +58,6 @@ jobs:
         show-progress: false
         persist-credentials: false
 
-    - name: Setup Ninja (Windows)
-      if: ${{ success() && startsWith(matrix.os, 'windows') }}
-      uses: seanmiddleditch/gha-setup-ninja@v6
-
     - name: Setup Visual C++
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
       uses: TheMrMilchmann/setup-msvc-dev@v4
@@ -104,28 +100,28 @@ jobs:
 
     - name: Upload (Linux)
       if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: 'libs-linux-${{ github.ref_name }}'
         path: 'lib/**/*.so*'
 
     - name: Upload (Windows)
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: 'libs-windows-${{ github.ref_name }}'
         path: '**/*.dll'
 
     - name: Upload (MacOS 12 x64)
       if: ${{ success() && startsWith(matrix.os, 'macos-12') }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: 'libs-macos-x64-${{ github.ref_name }}'
         path: '**/libzstd.dylib'
 
     - name: Upload (MacOS 13 ARM64)
       if: ${{ success() && startsWith(matrix.os, 'macos-14') }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: 'libs-macos-arm64-${{ github.ref_name }}'
         path: '**/libzstd.dylib'
