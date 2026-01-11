@@ -26,7 +26,7 @@ jobs:
     steps:
 
     - name: Clone (Linux)
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
       with:
         repository: facebook/zstd
@@ -38,7 +38,7 @@ jobs:
         persist-credentials: false
 
     - name: Clone (Windows)
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
       with:
         clean: true
@@ -47,7 +47,7 @@ jobs:
         persist-credentials: false
 
     - name: Clone (MacOS)
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       if: ${{ success() && startsWith(matrix.os, 'macos') }}
       with:
         repository: facebook/zstd
@@ -100,28 +100,28 @@ jobs:
 
     - name: Upload (Linux)
       if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: 'libs-linux-${{ github.ref_name }}'
         path: 'lib/**/*.so*'
 
     - name: Upload (Windows)
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: 'libs-windows-${{ github.ref_name }}'
         path: '**/*.dll'
 
     - name: Upload (MacOS 12 x64)
       if: ${{ success() && startsWith(matrix.os, 'macos-12') }}
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: 'libs-macos-x64-${{ github.ref_name }}'
         path: '**/libzstd.dylib'
 
     - name: Upload (MacOS 13 ARM64)
       if: ${{ success() && startsWith(matrix.os, 'macos-14') }}
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: 'libs-macos-arm64-${{ github.ref_name }}'
         path: '**/libzstd.dylib'
