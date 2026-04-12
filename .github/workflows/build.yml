@@ -128,7 +128,7 @@ jobs:
 
     - name: Release (Linux)
       if: ${{ success() && startsWith(matrix.os, 'ubuntu') }}
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         files: '**/libzstd.so'
         prerelease: true
@@ -141,7 +141,7 @@ jobs:
 
     - name: Release (Windows)
       if: ${{ success() && startsWith(matrix.os, 'windows') }}
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         files: '**/build/zstd.dll'
         prerelease: true
@@ -154,7 +154,7 @@ jobs:
 
     - name: Release (MacOS x64)
       if: ${{ success() && startsWith(matrix.os, 'macos-12') }}
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         files: '**/libzstd.dylib'
         prerelease: true
@@ -167,7 +167,7 @@ jobs:
 
     - name: Release (MacOS ARM64)
       if: ${{ success() && startsWith(matrix.os, 'macos-14') }}
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         files: '**/libzstd.dylib'
         prerelease: true
